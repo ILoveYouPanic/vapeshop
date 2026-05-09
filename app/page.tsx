@@ -1,65 +1,134 @@
-import Image from "next/image";
+'use client'
+import { useState } from "react";
 
-export default function Home() {
+const products = [
+  { id: 1, name: "RazzBar 30K", price: 13 },
+  { id: 2, name: "RazzBar 60K", price: 14 },
+  { id: 3, name: "VapSolo KING PRO", price: 14 },
+  { id: 4, name: "X-Bar 40K", price: 12 },
+];
+
+const flavors = [
+  "Blueberry Sour Raspberry",
+  "Mixed Berry",
+  "Cherry Cola",
+  "Watermelon Ice",
+  "Peach Mango Pineapple"
+];
+
+export default function VapeShop() {
+
+  const [cart, setCart] = useState<any[]>([]);
+  const [flavorMap, setFlavorMap] = useState<any>({});
+  const [order, setOrder] = useState({
+    name: "",
+    phone: "",
+    place: "",
+    time: ""
+  });
+
+  const addToCart = (p:any) => {
+    const flavor = flavorMap[p.id] || flavors[0];
+    setCart([...cart, { ...p, flavor }]);
+  };
+
+  const sendOrder = () => {
+    const text = `
+🔥 NUEVO PEDIDO VAPE SHOP
+
+${cart.map(i => `- ${i.name} (${i.flavor}) - ${i.price}€`).join("\n")}
+
+Nombre: ${order.name}
+Tel: ${order.phone}
+Lugar: ${order.place}
+Hora: ${order.time}
+    `;
+
+    window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
+    setCart([]);
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="p-6 max-w-5xl mx-auto">
+
+      <h1 className="text-3xl font-bold mb-2">VapeShop ADH 🚀</h1>
+      <p className="mb-6">Entrega en mano en Alcalá de Henares</p>
+
+      {/* PRODUCTS */}
+      <div className="grid md:grid-cols-2 gap-4 mb-6">
+        {products.map(p => (
+          <div key={p.id} className="border p-4 rounded">
+            <h2 className="font-bold">{p.name}</h2>
+            <p>{p.price}€</p>
+
+            <select
+              className="w-full border mt-2 p-2"
+              onChange={(e) =>
+                setFlavorMap({ ...flavorMap, [p.id]: e.target.value })
+              }
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              {flavors.map(f => (
+                <option key={f}>{f}</option>
+              ))}
+            </select>
+
+            <button
+              className="w-full mt-2 bg-black text-white py-2"
+              onClick={() => addToCart(p)}
             >
-              Learning
-            </a>{" "}
-            center.
+              Añadir
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* CART */}
+      <div className="border p-4 mb-4">
+        <h2 className="font-bold mb-2">Carrito</h2>
+        {cart.length === 0 && <p>Vacío</p>}
+        {cart.map((c, i) => (
+          <p key={i}>
+            {c.name} - {c.flavor} - {c.price}€
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+        ))}
+      </div>
+
+      {/* ORDER FORM */}
+      <div className="border p-4">
+
+        <input
+          placeholder="Nombre"
+          className="border p-2 w-full mb-2"
+          onChange={(e) => setOrder({ ...order, name: e.target.value })}
+        />
+
+        <input
+          placeholder="Teléfono"
+          className="border p-2 w-full mb-2"
+          onChange={(e) => setOrder({ ...order, phone: e.target.value })}
+        />
+
+        <input
+          placeholder="Lugar de entrega"
+          className="border p-2 w-full mb-2"
+          onChange={(e) => setOrder({ ...order, place: e.target.value })}
+        />
+
+        <input
+          type="time"
+          className="border p-2 w-full mb-2"
+          onChange={(e) => setOrder({ ...order, time: e.target.value })}
+        />
+
+        <button
+          onClick={sendOrder}
+          className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3"
+        >
+          🚀 Hacer pedido por WhatsApp
+        </button>
+
+      </div>
+
     </div>
   );
 }
